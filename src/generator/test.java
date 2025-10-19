@@ -1,6 +1,7 @@
 package generator;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -160,19 +161,19 @@ public class test {
 
         byte[] rt = new byte[dimensionTotalDePixeles];
 
-
         return rt;
     }
 
     public static void main(String[] args) {
-        try (Scanner sc = new Scanner(System.in)) { //Convenientemente declaramos el scanner con el try necesario para manejar files
 
-            //Hay que pedir el nombre del archivo
-            System.out.print("Introduce el nombre de la imagen: ");
-            String filename = sc.nextLine();
+        Scanner sc = new Scanner(System.in);
+        //Hay que pedir el nombre del archivo
+        System.out.print("Introduce el nombre de la imagen: ");
+        String filename = sc.nextLine();
 
-            File img = new File(filename + ".bmp");
+        File img = new File(filename + ".bmp");
 
+        try (FileOutputStream fos = new FileOutputStream(img)) {
             if (!img.exists()) {
                 img.createNewFile();
             }
@@ -200,9 +201,12 @@ public class test {
             byte[] bmpPixels = BMPPixels(altura, anchura, bitsPorPixel);
 
             //Lo guardamos a un solo array
-            byte[] headerCompleto = new byte[54];
-            System.arraycopy(fileHeader, 0, headerCompleto, 0, fileHeader.length);
-            System.arraycopy(bmpHeader, 0, headerCompleto, fileHeader.length, bmpHeader.length);
+            byte[] fullBMP = new byte[54];
+            System.arraycopy(fileHeader, 0, fullBMP, 0, fileHeader.length);
+            System.arraycopy(bmpHeader, 0, fullBMP, fileHeader.length, bmpHeader.length);
+            System.arraycopy(bmpPixels, 0, fullBMP, fileHeader.length + bmpHeader.length, bmpPixels.length);
+
+            fos.write(fullBMP);
 
         } catch (IOException ex) {
         }
