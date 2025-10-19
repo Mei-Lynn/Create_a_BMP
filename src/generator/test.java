@@ -3,6 +3,7 @@ package generator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class test {
@@ -169,8 +170,9 @@ public class test {
             }
 
             // Datos a pedir al usuario
-            System.out.print("Introduce el tamaño del lado del cuadrado:");
-            int lado = sc.nextInt();
+            System.out.print("Introduce el tamaño del lado del cuadrado: ");
+            int squareSize = sc.nextInt(); //Guardamos el tamaño del cuadrado
+            int imgSize = squareSize * 2; // y preparamos el tamaño de la imagen correspondiente
 
             // Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un
             // bmp
@@ -178,12 +180,12 @@ public class test {
             int bitsDelHeader = 54; // La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
 
             // Variables calculadas
-            int tamañoZonaPixeles = lado * lado * bitsPorPixel / 8; // todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
+            int tamañoZonaPixeles = imgSize * imgSize * bitsPorPixel / 8; // todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
             int tamañoArchivo = bitsDelHeader + tamañoZonaPixeles;
 
             // Inicio de la construcción
             byte[] fileHeader = FileHeader(tamañoArchivo);
-            byte[] bmpHeader = BMPHeader(lado, bitsPorPixel, tamañoZonaPixeles);
+            byte[] bmpHeader = BMPHeader(imgSize, bitsPorPixel, tamañoZonaPixeles);
 
             // Abrimos flujo para escribir el archivo BMP
             // Primero escribimos los encabezados
@@ -192,29 +194,52 @@ public class test {
 
             // Pedimos los colores del fondo y del cuadrado al usuario
             System.out.println("Introduce el color de fondo en RGB (0-255):");
-            System.out.print("Rojo -> ");
-            int fondoRojo = sc.nextInt();
-            System.out.print("Verde -> ");
-            int fondoVerde = sc.nextInt();
-            System.out.print("Azul -> ");
-            int fondoAzul = sc.nextInt();
+
+            int fondoRojo;
+            do {
+                System.out.print("Rojo -> ");
+                fondoRojo = sc.nextInt();
+            } while (255 < fondoRojo || fondoRojo < 0);
+            
+            int fondoVerde;
+            do {
+                System.out.print("Verde -> ");
+                fondoVerde = sc.nextInt();
+            } while (255 < fondoVerde || fondoVerde < 0);
+
+            int fondoAzul;
+            do {
+                System.out.print("Azul -> ");
+                fondoAzul = sc.nextInt();
+            } while (255 < fondoAzul || fondoAzul < 0);
 
             System.out.println("Introduce el color del cuadrado en RGB (0-255):");
-            System.out.print("Rojo -> ");
-            int cuadradoRojo = sc.nextInt();
-            System.out.print("Verde -> ");
-            int cuadradoVerde = sc.nextInt();
-            System.out.print("Azul -> ");
-            int cuadradoAzul = sc.nextInt();
 
-            // Tamaño y posición del cuadrado
-            int squareSize = lado / 2; // tamaño de la imagen
-            int inicio = (lado - squareSize) / 2; // posición inicial del cuadrado en el eje X
+            int cuadradoRojo;
+            do {
+                System.out.print("Rojo -> ");
+                cuadradoRojo = sc.nextInt();
+            } while (255 < cuadradoRojo || cuadradoRojo < 0);
+            
+            int cuadradoVerde;
+            do {
+                System.out.print("Verde -> ");
+                cuadradoVerde = sc.nextInt();
+            } while (255 < cuadradoVerde || cuadradoVerde < 0);
+            
+            int cuadradoAzul;
+            do {
+                System.out.print("Azul -> ");
+                cuadradoAzul = sc.nextInt();
+            } while (255 < cuadradoAzul || cuadradoAzul < 0);
+
+            // Posición del cuadrado
+            int inicio = (imgSize - squareSize) / 2; // posición inicial del cuadrado en el eje X
             int fin = inicio + squareSize - 1; // posición final del cuadrado en el eje X
 
             // BMP se escribe de abajo hacia arriba
-            for (int y = lado - 1; y >= 0; y--) {
-                for (int x = 0; x < lado; x++) {
+            for (int y = imgSize - 1; y >= 0; y--) {
+                for (int x = 0; x < imgSize; x++) {
                     boolean borde = (x >= inicio && x <= fin && (y == inicio || y == fin))
                             || (y >= inicio && y <= fin && (x == inicio || x == fin));
 
@@ -231,7 +256,10 @@ public class test {
             }
             System.out.println("Imagen BMP generada correctamente: " + img.getName());
 
-        } catch (IOException ex) {
+        } catch (IOException e) {
+            System.out.println("Error al crear el .bmp");
+        } catch (InputMismatchException e) {
+            System.out.println("Has introducido un valor erroneo");
         }
     }
 }
