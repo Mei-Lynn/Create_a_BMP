@@ -168,10 +168,8 @@ public class test {
                 img.createNewFile();
             }
 
-            sc.nextLine(); // Vaciado de buffer para usar nextInt
-
             // Datos a pedir al usuario
-            System.out.println("Introduce el tamaño del lado del cuadrado:");
+            System.out.print("Introduce el tamaño del lado del cuadrado:");
             int lado = sc.nextInt();
 
             // Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un
@@ -210,9 +208,9 @@ public class test {
             int cuadradoAzul = sc.nextInt();
 
             // Tamaño y posición del cuadrado
-            int imgSize = lado / 2; // tamaño de la imagen
-            int inicio = (imgSize - lado) / 2; // posición inicial del cuadrado en el eje X
-            int fin = inicio + lado - 1; // posición final del cuadrado en el eje X
+            int squareSize = lado / 2; // tamaño de la imagen
+            int inicio = (lado - squareSize) / 2; // posición inicial del cuadrado en el eje X
+            int fin = inicio + squareSize - 1; // posición final del cuadrado en el eje X
 
             // BMP se escribe de abajo hacia arriba
             for (int y = lado - 1; y >= 0; y--) {
