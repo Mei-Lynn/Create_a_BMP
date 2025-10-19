@@ -201,7 +201,7 @@ public class test {
             byte[] bmpPixels = BMPPixels(altura, anchura, bitsPorPixel);
 
             //Lo guardamos a un solo array
-            byte[] fullBMP = new byte[54];
+            byte[] fullBMP = new byte[fileHeader.length + bmpHeader.length + bmpPixels.length];
             System.arraycopy(fileHeader, 0, fullBMP, 0, fileHeader.length);
             System.arraycopy(bmpHeader, 0, fullBMP, fileHeader.length, bmpHeader.length);
             System.arraycopy(bmpPixels, 0, fullBMP, fileHeader.length + bmpHeader.length, bmpPixels.length);
