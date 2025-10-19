@@ -154,56 +154,84 @@ public class test {
         return rt;
     }
 
-    private static byte[] BMPPixels(int lado, int bitsPorPixel) {
-        int bytesPorFila = lado * bitsPorPixel / 8; //1 byte por color
-        int rellenoPorFila = (4 - (bytesPorFila % 4)) % 4; //relleno para asegurarnos de que cada fila es un multiplo de 4.
-        int dimensionTotalDePixeles = (bytesPorFila + rellenoPorFila) * lado;
-
-        byte[] rt = new byte[dimensionTotalDePixeles];
-
-        return rt;
-    }
-
     public static void main(String[] args) {
-
         Scanner sc = new Scanner(System.in);
-        //Hay que pedir el nombre del archivo
+
         System.out.print("Introduce el nombre de la imagen: ");
         String filename = sc.nextLine();
 
         File img = new File(filename + ".bmp");
 
         try (FileOutputStream fos = new FileOutputStream(img)) {
+
             if (!img.exists()) {
                 img.createNewFile();
             }
 
-            sc.nextLine(); //Vaciado de buffer para usar nextInt
+            sc.nextLine(); // Vaciado de buffer para usar nextInt
 
-            //Datos a pedir al usuario
-            System.out.print("Introduce el tamaño del lado del cuadrado:");
+            // Datos a pedir al usuario
+            System.out.println("Introduce el tamaño del lado del cuadrado:");
             int lado = sc.nextInt();
-        
-            //Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un bmp
-            int bitsPorPixel = 24; //8 por cada color
-            int bitsDelHeader = 54; //La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
 
-            //Variables calculadas
-            int tamañoZonaPixeles = lado * lado * bitsPorPixel / 8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
+            // Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un
+            // bmp
+            int bitsPorPixel = 24; // 8 por cada color
+            int bitsDelHeader = 54; // La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
+
+            // Variables calculadas
+            int tamañoZonaPixeles = lado * lado * bitsPorPixel / 8; // todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
             int tamañoArchivo = bitsDelHeader + tamañoZonaPixeles;
 
-            //Inicio de la construcción
+            // Inicio de la construcción
             byte[] fileHeader = FileHeader(tamañoArchivo);
             byte[] bmpHeader = BMPHeader(lado, bitsPorPixel, tamañoZonaPixeles);
-            byte[] bmpPixels = BMPPixels(lado, bitsPorPixel);
 
-            //Lo guardamos a un solo array
-            byte[] fullBMP = new byte[fileHeader.length + bmpHeader.length + bmpPixels.length];
-            System.arraycopy(fileHeader, 0, fullBMP, 0, fileHeader.length);
-            System.arraycopy(bmpHeader, 0, fullBMP, fileHeader.length, bmpHeader.length);
-            System.arraycopy(bmpPixels, 0, fullBMP, fileHeader.length + bmpHeader.length, bmpPixels.length);
+            // Abrimos flujo para escribir el archivo BMP
+            // Primero escribimos los encabezados
+            fos.write(fileHeader);
+            fos.write(bmpHeader);
 
-            fos.write(fullBMP);
+            // Pedimos los colores del fondo y del cuadrado al usuario
+            System.out.println("Introduce el color de fondo en RGB (0-255):");
+            System.out.print("Rojo -> ");
+            int fondoRojo = sc.nextInt();
+            System.out.print("Verde -> ");
+            int fondoVerde = sc.nextInt();
+            System.out.print("Azul -> ");
+            int fondoAzul = sc.nextInt();
+
+            System.out.println("Introduce el color del cuadrado en RGB (0-255):");
+            System.out.print("Rojo -> ");
+            int cuadradoRojo = sc.nextInt();
+            System.out.print("Verde -> ");
+            int cuadradoVerde = sc.nextInt();
+            System.out.print("Azul -> ");
+            int cuadradoAzul = sc.nextInt();
+
+            // Tamaño y posición del cuadrado
+            int imgSize = lado / 2; // tamaño de la imagen
+            int inicio = (imgSize - lado) / 2; // posición inicial del cuadrado en el eje X
+            int fin = inicio + lado - 1; // posición final del cuadrado en el eje X
+
+            // BMP se escribe de abajo hacia arriba
+            for (int y = lado - 1; y >= 0; y--) {
+                for (int x = 0; x < lado; x++) {
+                    boolean borde = (x >= inicio && x <= fin && (y == inicio || y == fin))
+                            || (y >= inicio && y <= fin && (x == inicio || x == fin));
+
+                    int R = borde ? cuadradoRojo : fondoRojo;
+                    int G = borde ? cuadradoVerde : fondoVerde;
+                    int B = borde ? cuadradoAzul : fondoAzul;
+
+                    fos.write((byte) B);
+                    fos.write((byte) G);
+                    fos.write((byte) R);
+
+                }
+
+            }
+            System.out.println("Imagen BMP generada correctamente: " + img.getName());
 
         } catch (IOException ex) {
         }
