@@ -43,8 +43,7 @@ public class bmpGenerator {
     }
 
     /**
-     * Genera el encabezado del archivo, 14 bytes con informacion sobre el
-     * propio archivo
+     * Genera el encabezado del archivo, 14 bytes con informacion sobre el propio archivo
      *
      * @param tamaño
      * @return
@@ -81,6 +80,13 @@ public class bmpGenerator {
         return rt;
     }
 
+    /**
+     * Genera los 40 bytes de informacion necesarios relativos al BMP
+     * @param lado
+     * @param bitsPorPixel
+     * @param tamañoZonaPixeles
+     * @return
+     */
     private static byte[] BMPHeader(int lado, int bitsPorPixel, int tamañoZonaPixeles) {
         byte[] rt = new byte[40];
 
@@ -261,5 +267,6 @@ public class bmpGenerator {
         } catch (InputMismatchException e) {
             System.out.println("Has introducido un valor erroneo");
         }
+        sc.close();
     }
 }
