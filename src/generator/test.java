@@ -43,11 +43,11 @@ public class test {
     private static byte[] FileHeader(int tamaño) {
         byte[] rt = new byte[14];
 
-        //Bytes 1 y 2 de la cabecera, declaran el tipo
+        //Bytes 0-1 de la cabecera, declaran el tipo
         rt[0] = (byte) 'B';
         rt[1] = (byte) 'M';
         
-        //bytes 3-4-5-6, tamaño del archivo. Hay que generarlos como little endian
+        //2-3-4-5, tamaño del archivo. Hay que generarlos como little endian
         byte[] bytesTamaño = intToLittleEndianBytes(tamaño);
         rt[2] = bytesTamaño[0];
         rt[3] = bytesTamaño[1];
@@ -55,13 +55,13 @@ public class test {
         rt[5] = bytesTamaño[3];
         //NOTA: Estoy evitando usar bucles deliberadamente para mantener una claridad visual de que se guarda en cada byte
 
-        //Bytes 7-8-9-10, espacios reservados, deben ser 0
+        //6-7-8-9, espacios reservados, deben ser 0
         rt[6] = 0;
         rt[7] = 0;
         rt[8] = 0;
         rt[9] = 0;
 
-        //11-12-13-14, offset. AKA cual es el primer byte relativo al aspecto de la imagen, para un bmp es cuando termina la cabecera en el byte 54
+        //10-11-12-13, offset. AKA cual es el primer byte relativo al aspecto de la imagen, para un bmp es cuando termina la cabecera en el byte 54
         byte[] bytesOffset = intToLittleEndianBytes(54);
         rt[10] = bytesOffset[0];
         rt[11] = bytesOffset[1];
@@ -72,10 +72,10 @@ public class test {
         return rt;
     }
     
-    private static byte[] BMPHeader (int anchura, int altura) {
+    private static byte[] BMPHeader (int anchura, int altura, int bitsPorPixel, int tamañoZonaPixeles) {
         byte[] rt = new byte[40];
 
-        //15-16-17-18, tamaño del encabezado de la info del bmp, 40 en little endian
+        //14-15-16-17, tamaño del encabezado de la info del bmp, 40 en little endian
         byte[] bmpHeaderSize = intToLittleEndianBytes(40);
         rt[0] = bmpHeaderSize[0];
         rt[1] = bmpHeaderSize[1];
@@ -101,7 +101,47 @@ public class test {
         rt[12] = planos[0];
         rt[13] = planos[1];
 
-        //28-29, tamaño de los puntos, es 
+        //28-29, tamaño de los puntos, es cuantos bits se necesitan para definir el color de un pixel por pantalla
+        byte[] tamañoPuntos = shortToLittleEndianBytes((short) bitsPorPixel);
+        rt[14] = tamañoPuntos[0];
+        rt[15] = tamañoPuntos[1];
+
+        //30-31-32-33, compresión, en este ejercicio no hacemos ninguna así que se mantiene en 0
+        rt[16] = 0;
+        rt[17] = 0;
+        rt[18] = 0;
+        rt[19] = 0;
+
+        //34-35-36-37, tamaño necesario para todos los pixeles
+        byte[] tamañoPixeles = intToLittleEndianBytes(tamañoZonaPixeles);
+        rt[20] = tamañoPixeles[0];
+        rt[21] = tamañoPixeles[1];
+        rt[22] = tamañoPixeles[2];
+        rt[23] = tamañoPixeles[3];
+
+        //38-39-40-41, Resolución horizontal, no es muy importante y la podemos dejar a 0
+        rt[24] = 0;
+        rt[25] = 0;
+        rt[26] = 0;
+        rt[27] = 0;
+
+        //42-43-44-45, Resolucion vertical, lo mismo
+        rt[28] = 0;
+        rt[29] = 0;
+        rt[30] = 0;
+        rt[31] = 0;
+
+        //46-47-48-49, tabla de colores, irrelevante porque estamos usando todos los colores con 24 bits por pixel, se mantiene a 0
+        rt[32] = 0;
+        rt[33] = 0;
+        rt[34] = 0;
+        rt[35] = 0;
+
+        //50-51-52-53, colores importantes, tampoco importa
+        rt[36] = 0;
+        rt[37] = 0;
+        rt[38] = 0;
+        rt[39] = 0;
 
         return rt;
     }
@@ -120,20 +160,26 @@ public class test {
                 img.createNewFile();
             }
 
-            //Datos a pedir por el usuario
-            int altura = 100;
-            int anchura = 100;
+            sc.nextLine(); //Vaciado de buffer para usar nextInt
+
+            //Datos a pedir al usuario
+            System.out.println("Introduce las dimensiones del cuadrado:");
+            System.out.print("Altura -> ");
+            int altura = sc.nextInt();
+            System.out.print("Anchura -> ");
+            int anchura = sc.nextInt();
 
             //Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un bmp
             int bitsPorPixel = 24; //8 por cada color
             int bitsDelHeader = 54; //La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
 
             //Variables calculadas
-            int tamaño = bitsDelHeader + altura * anchura * bitsPorPixel;
+            int tamañoZonaPixeles = altura * anchura * bitsPorPixel/8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
+            int tamañoArchivo = bitsDelHeader + tamañoZonaPixeles;
             
             //Inicio de la construcción
-            byte[] fileHeader = FileHeader(tamaño);
-            byte[] bmpHeader = BMPHeader(anchura, altura);
+            byte[] fileHeader = FileHeader(tamañoArchivo);
+            byte[] bmpHeader = BMPHeader(anchura, altura, bitsPorPixel, tamañoZonaPixeles);
             
         } catch (IOException ex) {
         }
