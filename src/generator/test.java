@@ -5,38 +5,45 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class test {
+
     /**
-     * Metodo necesario para crear little endians, es el formato estandar para valores numericos en bmps
-     * Java usa por defecto big endian, así que hay que leer desde el final para escribirlo en LE.
-     * Se usa ints en caso de que ocupe 4 bits
+     * Metodo necesario para crear little endians, es el formato estandar para
+     * valores numericos en bmps Java usa por defecto big endian, así que hay
+     * que leer desde el final para escribirlo en LE. Se usa ints en caso de que
+     * ocupe 4 bits
+     *
      * @param value
      * @return
      */
     private static byte[] intToLittleEndianBytes(int value) {
-        return new byte[] {
-            (byte) (value & 0xFF), 
+        return new byte[]{
+            (byte) (value & 0xFF),
             (byte) ((value >> 8) & 0xFF),
             (byte) ((value >> 16) & 0xFF),
-            (byte) ((value >> 24) & 0xFF)  
+            (byte) ((value >> 24) & 0xFF)
         };
     }
 
     /**
-     * Metodo necesario para crear little endians, es el formato estandar para valores numericos en bmps
-     * Java usa por defecto big endian, así que hay que leer desde el final para esribirlo en LE.
-     * Se usa shorts en caso de que ocupe 2 bits
+     * Metodo necesario para crear little endians, es el formato estandar para
+     * valores numericos en bmps Java usa por defecto big endian, así que hay
+     * que leer desde el final para esribirlo en LE. Se usa shorts en caso de
+     * que ocupe 2 bits
+     *
      * @param value
      * @return
      */
     private static byte[] shortToLittleEndianBytes(short value) {
-    return new byte[] {
-        (byte) (value & 0xFF),         // Byte menos significativo
-        (byte) ((value >> 8) & 0xFF)   // Byte más significativo
-    };
-}
+        return new byte[]{
+            (byte) (value & 0xFF), // Byte menos significativo
+            (byte) ((value >> 8) & 0xFF) // Byte más significativo
+        };
+    }
 
     /**
-     * Genera el encabezado del archivo, 14 bytes con informacion sobre el propio archivo
+     * Genera el encabezado del archivo, 14 bytes con informacion sobre el
+     * propio archivo
+     *
      * @param tamaño
      * @return
      */
@@ -46,7 +53,7 @@ public class test {
         //Bytes 0-1 de la cabecera, declaran el tipo
         rt[0] = (byte) 'B';
         rt[1] = (byte) 'M';
-        
+
         //2-3-4-5, tamaño del archivo. Hay que generarlos como little endian
         byte[] bytesTamaño = intToLittleEndianBytes(tamaño);
         rt[2] = bytesTamaño[0];
@@ -71,8 +78,8 @@ public class test {
         //El array de la cabecera está listo
         return rt;
     }
-    
-    private static byte[] BMPHeader (int anchura, int altura, int bitsPorPixel, int tamañoZonaPixeles) {
+
+    private static byte[] BMPHeader(int anchura, int altura, int bitsPorPixel, int tamañoZonaPixeles) {
         byte[] rt = new byte[40];
 
         //14-15-16-17, tamaño del encabezado de la info del bmp, 40 en little endian
@@ -146,16 +153,26 @@ public class test {
         return rt;
     }
 
+    private static byte[] BMPPixels(int altura, int anchura, int bitsPorPixel) {
+        int bytesPorFila = anchura * bitsPorPixel / 8; //1 byte por color
+        int rellenoPorFila = (4 - (bytesPorFila % 4)) % 4; //relleno para asegurarnos de que cada fila es un multiplo de 4.
+        int dimensionTotalDePixeles = (bytesPorFila + rellenoPorFila) * altura;
+
+        byte[] rt = new byte[dimensionTotalDePixeles];
+
+
+        return rt;
+    }
 
     public static void main(String[] args) {
         try (Scanner sc = new Scanner(System.in)) { //Convenientemente declaramos el scanner con el try necesario para manejar files
-            
+
             //Hay que pedir el nombre del archivo
             System.out.print("Introduce el nombre de la imagen: ");
             String filename = sc.nextLine();
 
-            File img = new File(filename+".bmp");
-            
+            File img = new File(filename + ".bmp");
+
             if (!img.exists()) {
                 img.createNewFile();
             }
@@ -174,13 +191,19 @@ public class test {
             int bitsDelHeader = 54; //La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
 
             //Variables calculadas
-            int tamañoZonaPixeles = altura * anchura * bitsPorPixel/8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
+            int tamañoZonaPixeles = altura * anchura * bitsPorPixel / 8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
             int tamañoArchivo = bitsDelHeader + tamañoZonaPixeles;
-            
+
             //Inicio de la construcción
             byte[] fileHeader = FileHeader(tamañoArchivo);
             byte[] bmpHeader = BMPHeader(anchura, altura, bitsPorPixel, tamañoZonaPixeles);
-            
+            byte[] bmpPixels = BMPPixels(altura, anchura, bitsPorPixel);
+
+            //Lo guardamos a un solo array
+            byte[] headerCompleto = new byte[54];
+            System.arraycopy(fileHeader, 0, headerCompleto, 0, fileHeader.length);
+            System.arraycopy(bmpHeader, 0, headerCompleto, fileHeader.length, bmpHeader.length);
+
         } catch (IOException ex) {
         }
     }
