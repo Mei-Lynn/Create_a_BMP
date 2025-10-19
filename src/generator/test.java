@@ -4,8 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class test {
-    //Metodo necesario para crear little endians, es el formato estandar para valores numericos en bmpsç
-    //Java usa por defecto big endian, así que hay que leer desde el final
+    /**
+     * Metodo necesario para crear little endians, es el formato estandar para valores numericos en bmpsç
+     * Java usa por defecto big endian, así que hay que leer desde el final
+     * @param value
+     * @return
+     */
     private static byte[] intToLittleEndianBytes(int value) {
         return new byte[] {
             (byte) (value & 0xFF), 
@@ -15,6 +19,11 @@ public class test {
         };
     }
 
+    /**
+     * Genera el encabezado del archivo, 14 bytes con informacion sobre el propio archivo
+     * @param tamaño
+     * @return
+     */
     private static byte[] FileHeader(int tamaño) {
         byte[] rt = new byte[14];
 
@@ -46,6 +55,10 @@ public class test {
         //El array de la cabecera está listo
         return rt;
     }
+    
+    private static byte[] BMPHeader () {
+        byte[] rt = new byte[40];
+    }
 
 
     public static void main(String[] args) {
@@ -65,7 +78,8 @@ public class test {
 
             int tamaño = bytesPorHeader + altura * anchura * bytesPorPixel;
             
-            byte[] BMPheader = FileHeader(tamaño);
+            //Inicio de la construcción
+            byte[] fileHeader = FileHeader(tamaño);
 
             
         } catch (IOException ex) {
