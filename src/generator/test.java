@@ -80,7 +80,7 @@ public class test {
         return rt;
     }
 
-    private static byte[] BMPHeader(int anchura, int altura, int bitsPorPixel, int tamañoZonaPixeles) {
+    private static byte[] BMPHeader(int lado, int bitsPorPixel, int tamañoZonaPixeles) {
         byte[] rt = new byte[40];
 
         //14-15-16-17, tamaño del encabezado de la info del bmp, 40 en little endian
@@ -91,14 +91,14 @@ public class test {
         rt[3] = bmpHeaderSize[3];
 
         //18-19-20-21, anchura de la imagen
-        byte[] anchuraLE = intToLittleEndianBytes(anchura);
+        byte[] anchuraLE = intToLittleEndianBytes(lado);
         rt[4] = anchuraLE[0];
         rt[5] = anchuraLE[1];
         rt[6] = anchuraLE[2];
         rt[7] = anchuraLE[3];
 
         //22-23-24-25, altura de la imagen
-        byte[] alturaLE = intToLittleEndianBytes(altura);
+        byte[] alturaLE = intToLittleEndianBytes(lado);
         rt[8] = alturaLE[0];
         rt[9] = alturaLE[1];
         rt[10] = alturaLE[2];
@@ -154,10 +154,10 @@ public class test {
         return rt;
     }
 
-    private static byte[] BMPPixels(int altura, int anchura, int bitsPorPixel) {
-        int bytesPorFila = anchura * bitsPorPixel / 8; //1 byte por color
+    private static byte[] BMPPixels(int lado, int bitsPorPixel) {
+        int bytesPorFila = lado * bitsPorPixel / 8; //1 byte por color
         int rellenoPorFila = (4 - (bytesPorFila % 4)) % 4; //relleno para asegurarnos de que cada fila es un multiplo de 4.
-        int dimensionTotalDePixeles = (bytesPorFila + rellenoPorFila) * altura;
+        int dimensionTotalDePixeles = (bytesPorFila + rellenoPorFila) * lado;
 
         byte[] rt = new byte[dimensionTotalDePixeles];
 
@@ -181,24 +181,21 @@ public class test {
             sc.nextLine(); //Vaciado de buffer para usar nextInt
 
             //Datos a pedir al usuario
-            System.out.println("Introduce las dimensiones del cuadrado:");
-            System.out.print("Altura -> ");
-            int altura = sc.nextInt();
-            System.out.print("Anchura -> ");
-            int anchura = sc.nextInt();
-
+            System.out.print("Introduce el tamaño del lado del cuadrado:");
+            int lado = sc.nextInt();
+        
             //Constante, cuantos bytes usamos por pixel y cuanto ocupa el encabezado de un bmp
             int bitsPorPixel = 24; //8 por cada color
             int bitsDelHeader = 54; //La cantidad de bits que vamos a ocupar para hacer el encabezado completo.
 
             //Variables calculadas
-            int tamañoZonaPixeles = altura * anchura * bitsPorPixel / 8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
+            int tamañoZonaPixeles = lado * lado * bitsPorPixel / 8; //todos los bits necesarios para mostrar cada pixel segun las dimensiones dadas por el usuario
             int tamañoArchivo = bitsDelHeader + tamañoZonaPixeles;
 
             //Inicio de la construcción
             byte[] fileHeader = FileHeader(tamañoArchivo);
-            byte[] bmpHeader = BMPHeader(anchura, altura, bitsPorPixel, tamañoZonaPixeles);
-            byte[] bmpPixels = BMPPixels(altura, anchura, bitsPorPixel);
+            byte[] bmpHeader = BMPHeader(lado, bitsPorPixel, tamañoZonaPixeles);
+            byte[] bmpPixels = BMPPixels(lado, bitsPorPixel);
 
             //Lo guardamos a un solo array
             byte[] fullBMP = new byte[fileHeader.length + bmpHeader.length + bmpPixels.length];
