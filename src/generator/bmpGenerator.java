@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class test {
+public class bmpGenerator {
 
     /**
      * Metodo necesario para crear little endians, es el formato estandar para
