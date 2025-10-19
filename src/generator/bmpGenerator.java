@@ -176,7 +176,7 @@ public class bmpGenerator {
             }
 
             // Datos a pedir al usuario
-            System.out.print("Introduce el tamaño del lado del cuadrado\nNOTA: (evita numeros demasiado grandes para no hacer archivos gigantes ej.:2500)\n-> ");
+            System.out.print("Introduce el tamaño del lado del cuadrado\nNOTA: evita numeros demasiado grandes para no hacer archivos gigantes, ej.:2500\n-> ");
             int squareSize = sc.nextInt(); //Guardamos el tamaño del cuadrado
             int imgSize = squareSize * 2; // y preparamos el tamaño de la imagen correspondiente
 
